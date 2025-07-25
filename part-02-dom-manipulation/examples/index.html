@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part 2: DOM Manipulation Examples</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 5px; }
+        .highlight { background-color: yellow; }
+        .hidden { display: none; }
+        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+        .card h3 { margin-top: 0; }
+        #item-list .completed { text-decoration: line-through; color: #888; }
+        .error-message { color: red; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="main-title">DOM Manipulation Playground</h1>
+            <p class="intro">This page contains various elements to practice JavaScript DOM manipulation.</p>
+        </header>
+
+        <section class="card" id="manipulation-section">
+            <h3>Content & Style Manipulation</h3>
+            <p id="text-to-change">This text will change when you click the button.</p>
+            <button id="change-text-btn">Change Text</button>
+            <button id="toggle-style-btn">Toggle Highlight</button>
+        </section>
+
+        <section class="card" id="list-section">
+            <h3>Creating & Removing Elements</h3>
+            <ul id="item-list">
+                <li class="item">Item 1 <button class="delete-btn">X</button></li>
+                <li class="item">Item 2 <button class="delete-btn">X</button></li>
+                <li class="item">Item 3 <button class="delete-btn">X</button></li>
+            </ul>
+            <input type="text" id="new-item-input" placeholder="Add a new item">
+            <button id="add-item-btn">Add Item</button>
+        </section>
+
+        <section class="card" id="form-section">
+            <h3>Form Handling</h3>
+            <form id="user-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required minlength="3">
+                <div class="error-message" id="username-error"></div>
+                <br><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <br><br>
+                <button type="submit">Submit</button>
+            </form>
+            <div id="form-output"></div>
+        </section>
+    </div>
+
+    <script src="examples.js"></script>
+</body>
+</html>
