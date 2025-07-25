@@ -3,6 +3,14 @@
 
 Welcome to the most comprehensive JavaScript course that will take you from zero to hero! This course is designed by a professional software developer to give you real-world skills.
 
+## ❤️ Support This Course
+
+If you find this free course valuable and would like to show your appreciation, you can support its development via Selar's "Show Me Love" feature! Every contribution helps in maintaining and creating more high-quality content.
+
+[![Show Me Love on Selar](https://img.shields.io/badge/Show%20Me%20Love-%F0%9F%92%9C-blueviolet?style=for-the-badge)](https://selar.com/showlove/gifted-dev)
+
+---
+
 ## 📚 Course Structure
 
 ### **Part 1: JavaScript Fundamentals (Beginner Level)**
