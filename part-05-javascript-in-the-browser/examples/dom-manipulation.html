@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced DOM Manipulation Examples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .demo-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .virtual-list {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            background: white;
+        }
+        
+        .list-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        
+        .list-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .lazy-image {
+            width: 200px;
+            height: 150px;
+            background: #ddd;
+            margin: 10px;
+            display: inline-block;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        
+        .lazy-image.loaded {
+            opacity: 1;
+        }
+        
+        .mutation-target {
+            min-height: 100px;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .performance-metrics {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Advanced DOM Manipulation Examples</h1>
+    <p>This page demonstrates modern DOM manipulation techniques for high-performance web applications.</p>
+
+    <!-- Section 1: Efficient DOM Updates -->
+    <div class="section">
+        <h2>1. Efficient DOM Updates with Document Fragments</h2>
+        <div class="demo-container">
+            <button onclick="addItemsInefficient()">Add 1000 Items (Inefficient)</button>
+            <button onclick="addItemsEfficient()">Add 1000 Items (Efficient)</button>
+            <button onclick="clearItems()">Clear Items</button>
+            <div class="performance-metrics" id="performance-1"></div>
+            <div id="items-container"></div>
+        </div>
+    </div>
+
+    <!-- Section 2: Virtual Scrolling -->
+    <div class="section">
+        <h2>2. Virtual Scrolling for Large Lists</h2>
+        <div class="demo-container">
+            <button onclick="createVirtualList()">Create Virtual List (10,000 items)</button>
+            <button onclick="destroyVirtualList()">Destroy List</button>
+            <div class="virtual-list" id="virtual-container"></div>
+        </div>
+    </div>
+
+    <!-- Section 3: Intersection Observer -->
+    <div class="section">
+        <h2>3. Intersection Observer for Lazy Loading</h2>
+        <div class="demo-container">
+            <button onclick="createLazyImages()">Create Lazy Images</button>
+            <button onclick="clearLazyImages()">Clear Images</button>
+            <div id="lazy-container"></div>
+        </div>
+    </div>
+
+    <!-- Section 4: Mutation Observer -->
+    <div class="section">
+        <h2>4. Mutation Observer for Dynamic Content</h2>
+        <div class="demo-container">
+            <button onclick="addRandomElement()">Add Random Element</button>
+            <button onclick="modifyAttribute()">Modify Attribute</button>
+            <button onclick="removeElement()">Remove Element</button>
+            <div class="mutation-target" id="mutation-target">
+                <p>Dynamic content area - watch the console for mutation events!</p>
+            </div>
+            <div class="performance-metrics" id="mutation-log"></div>
+        </div>
+    </div>
+
+    <!-- Section 5: Template Elements -->
+    <div class="section">
+        <h2>5. Template Elements for Reusable Content</h2>
+        <div class="demo-container">
+            <button onclick="addCard()">Add Card</button>
+            <button onclick="clearCards()">Clear Cards</button>
+            <div id="cards-container"></div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="card-template">
+        <div class="card" style="border: 1px solid #ddd; padding: 15px; margin: 10px; border-radius: 5px; background: white;">
+            <h3 class="card-title">Card Title</h3>
+            <p class="card-description">Card description goes here.</p>
+            <button class="card-button" onclick="this.parentElement.remove()">Remove</button>
+        </div>
+    </template>
+
+    <script>
+        // Performance monitoring utility
+        function measurePerformance(name, fn) {
+            const start = performance.now();
+            const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+            
+            const result = fn();
+            
+            const end = performance.now();
+            const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+            
+            const metrics = {
+                duration: `${(end - start).toFixed(2)}ms`,
+                memoryDelta: performance.memory ? `${((endMemory - startMemory) / 1024 / 1024).toFixed(2)}MB` : 'N/A'
+            };
+            
+            document.getElementById('performance-1').innerHTML = 
+                `${name}: ${metrics.duration}, Memory: ${metrics.memoryDelta}`;
+            
+            return result;
+        }
+
+        // Section 1: Efficient DOM Updates
+        function addItemsInefficient() {
+            measurePerformance('Inefficient Method', () => {
+                const container = document.getElementById('items-container');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < 1000; i++) {
+                    const div = document.createElement('div');
+                    div.textContent = `Item ${i + 1}`;
+                    div.className = 'list-item';
+                    container.appendChild(div); // DOM update on each iteration
+                }
+            });
+        }
+
+        function addItemsEfficient() {
+            measurePerformance('Efficient Method', () => {
+                const container = document.getElementById('items-container');
+                container.innerHTML = '';
+                
+                const fragment = document.createDocumentFragment();
+                
+                for (let i = 0; i < 1000; i++) {
+                    const div = document.createElement('div');
+                    div.textContent = `Item ${i + 1}`;
+                    div.className = 'list-item';
+                    fragment.appendChild(div); // No DOM update yet
+                }
+                
+                container.appendChild(fragment); // Single DOM update
+            });
+        }
+
+        function clearItems() {
+            document.getElementById('items-container').innerHTML = '';
+            document.getElementById('performance-1').innerHTML = '';
+        }
+
+        // Section 2: Virtual Scrolling
+        let virtualList = null;
+
+        class VirtualList {
+            constructor(container, itemHeight, totalItems, renderItem) {
+                this.container = container;
+                this.itemHeight = itemHeight;
+                this.totalItems = totalItems;
+                this.renderItem = renderItem;
+                this.visibleStart = 0;
+                this.visibleEnd = 0;
+                this.scrollTop = 0;
+                
+                this.container.style.position = 'relative';
+                this.container.addEventListener('scroll', this.onScroll.bind(this));
+                
+                this.render();
+            }
+            
+            onScroll() {
+                this.scrollTop = this.container.scrollTop;
+                this.render();
+            }
+            
+            render() {
+                const containerHeight = this.container.clientHeight;
+                const visibleStart = Math.floor(this.scrollTop / this.itemHeight);
+                const visibleEnd = Math.min(
+                    visibleStart + Math.ceil(containerHeight / this.itemHeight) + 1,
+                    this.totalItems
+                );
+                
+                if (visibleStart !== this.visibleStart || visibleEnd !== this.visibleEnd) {
+                    this.visibleStart = visibleStart;
+                    this.visibleEnd = visibleEnd;
+                    this.updateDOM();
+                }
+            }
+            
+            updateDOM() {
+                this.container.innerHTML = '';
+                
+                // Top spacer
+                if (this.visibleStart > 0) {
+                    const spacer = document.createElement('div');
+                    spacer.style.height = `${this.visibleStart * this.itemHeight}px`;
+                    this.container.appendChild(spacer);
+                }
+                
+                // Visible items
+                for (let i = this.visibleStart; i < this.visibleEnd; i++) {
+                    const item = this.renderItem(i);
+                    this.container.appendChild(item);
+                }
+                
+                // Bottom spacer
+                if (this.visibleEnd < this.totalItems) {
+                    const spacer = document.createElement('div');
+                    spacer.style.height = `${(this.totalItems - this.visibleEnd) * this.itemHeight}px`;
+                    this.container.appendChild(spacer);
+                }
+            }
+            
+            destroy() {
+                this.container.removeEventListener('scroll', this.onScroll);
+                this.container.innerHTML = '';
+            }
+        }
+
+        function createVirtualList() {
+            const container = document.getElementById('virtual-container');
+            
+            if (virtualList) {
+                virtualList.destroy();
+            }
+            
+            virtualList = new VirtualList(
+                container,
+                40, // item height
+                10000, // total items
+                (index) => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.style.height = '40px';
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.textContent = `Virtual Item ${index + 1}`;
+                    return div;
+                }
+            );
+        }
+
+        function destroyVirtualList() {
+            if (virtualList) {
+                virtualList.destroy();
+                virtualList = null;
+            }
+        }
+
+        // Section 3: Intersection Observer
+        let imageObserver = null;
+
+        function createLazyImages() {
+            const container = document.getElementById('lazy-container');
+            container.innerHTML = '';
+            
+            // Create observer
+            imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        // Simulate loading
+                        setTimeout(() => {
+                            img.style.background = `linear-gradient(45deg, 
+                                hsl(${Math.random() * 360}, 70%, 70%), 
+                                hsl(${Math.random() * 360}, 70%, 70%))`;
+                            img.classList.add('loaded');
+                            img.textContent = 'Loaded!';
+                        }, Math.random() * 1000 + 500);
+                        
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '50px',
+                threshold: 0.1
+            });
+            
+            // Create lazy images
+            for (let i = 0; i < 20; i++) {
+                const img = document.createElement('div');
+                img.className = 'lazy-image';
+                img.textContent = `Image ${i + 1}`;
+                container.appendChild(img);
+                imageObserver.observe(img);
+            }
+        }
+
+        function clearLazyImages() {
+            if (imageObserver) {
+                imageObserver.disconnect();
+            }
+            document.getElementById('lazy-container').innerHTML = '';
+        }
+
+        // Section 4: Mutation Observer
+        let mutationObserver = null;
+        let mutationCount = 0;
+
+        function setupMutationObserver() {
+            const target = document.getElementById('mutation-target');
+            const log = document.getElementById('mutation-log');
+            
+            mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    mutationCount++;
+                    const message = `Mutation ${mutationCount}: ${mutation.type}`;
+                    
+                    if (mutation.type === 'childList') {
+                        log.innerHTML += `<div>${message} - ${mutation.addedNodes.length} added, ${mutation.removedNodes.length} removed</div>`;
+                    } else if (mutation.type === 'attributes') {
+                        log.innerHTML += `<div>${message} - attribute "${mutation.attributeName}" changed</div>`;
+                    }
+                    
+                    log.scrollTop = log.scrollHeight;
+                });
+            });
+            
+            mutationObserver.observe(target, {
+                childList: true,
+                attributes: true,
+                subtree: true,
+                attributeOldValue: true
+            });
+        }
+
+        function addRandomElement() {
+            const target = document.getElementById('mutation-target');
+            const element = document.createElement('div');
+            element.textContent = `Random element ${Date.now()}`;
+            element.style.padding = '5px';
+            element.style.margin = '5px';
+            element.style.background = '#e9ecef';
+            element.style.borderRadius = '3px';
+            target.appendChild(element);
+        }
+
+        function modifyAttribute() {
+            const target = document.getElementById('mutation-target');
+            const randomColor = `hsl(${Math.random() * 360}, 50%, 90%)`;
+            target.style.backgroundColor = randomColor;
+        }
+
+        function removeElement() {
+            const target = document.getElementById('mutation-target');
+            const children = target.children;
+            if (children.length > 1) { // Keep at least the original paragraph
+                const randomIndex = Math.floor(Math.random() * (children.length - 1)) + 1;
+                children[randomIndex].remove();
+            }
+        }
+
+        // Section 5: Template Elements
+        let cardCounter = 0;
+
+        function addCard() {
+            const template = document.getElementById('card-template');
+            const container = document.getElementById('cards-container');
+            
+            const clone = template.content.cloneNode(true);
+            
+            cardCounter++;
+            clone.querySelector('.card-title').textContent = `Card ${cardCounter}`;
+            clone.querySelector('.card-description').textContent = 
+                `This is card number ${cardCounter} created from a template.`;
+            
+            container.appendChild(clone);
+        }
+
+        function clearCards() {
+            document.getElementById('cards-container').innerHTML = '';
+            cardCounter = 0;
+        }
+
+        // Initialize mutation observer when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMutationObserver();
+            console.log('🚀 DOM Manipulation examples loaded!');
+            console.log('Try the different buttons to see various DOM techniques in action.');
+        });
+    </script>
+</body>
+</html>
